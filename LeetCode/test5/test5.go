@@ -21,7 +21,7 @@ func longestPalindrome(s string) string {
 	strLen := len(s)
 	left := 0    //左扩散的边界下标
 	right := 0   //右扩散的边界下标
-	len := 0     //当前回文串的长度
+	length := 0  //当前回文串的长度
 	maxLen := 0  //最大回文串长度
 	maxLeft := 0 //最大回文串的左边界
 
@@ -44,10 +44,10 @@ func longestPalindrome(s string) string {
 		//最后退出时的下标肯定是不符合条件的，所以要往前复原一次
 		left++
 		right--
-		len = right - left + 1
+		length = right - left + 1
 		//如果当前len为最大值，就覆盖maxLen和maxLeft的值
-		if len > maxLen {
-			maxLen = len
+		if length > maxLen {
+			maxLen = length
 			maxLeft = left
 		}
 	}
