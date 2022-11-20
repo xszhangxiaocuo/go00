@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <title>Hello</title>
+</head>
+<body>
+<p>Hello!{{ . }}</p>
+<hr>
+{{/*嵌套模板*/}}
+{{template "demo1.tmpl"}}
+<hr>
+{{template "demo2.tmpl"}}
+</body>
+</html>
+{{/*定义一个模板*/}}
+{{define "demo2.tmpl"}}
+<demo2>
+    <li>嘻</li>
+    <li>嘻嘻</li>
+    <li>嘻嘻嘻</li>
+</demo2>
+{{end}}
