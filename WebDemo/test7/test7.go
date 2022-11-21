@@ -42,5 +42,21 @@ func main() {
 	r.GET("/team", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "team.html", nil)
 	})
+
+	r.GET("/blog", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "blog.html", nil)
+	})
+
+	r.GET("/blog-details", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "blog-details.html", nil)
+	})
+
+	r.GET("/blog-grid-left-sidebar", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "blog-grid-left-sidebar.html", nil)
+	})
+
+	r.GET("/blog-grid-right-sidebar", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "blog-grid-right-sidebar.html", nil)
+	})
 	r.Run(":9090")
 }
