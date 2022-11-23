@@ -11,8 +11,11 @@ import (
 )
 
 func main() {
+	//创建一个默认路由
 	r := gin.Default()
+	//GET：请求方式 "/demo"是请求路径，当浏览器发送GET请求时，会执行后面的匿名函数
 	r.GET("/demo", func(c *gin.Context) {
+		//返回JSON格式的数据
 		c.JSON(http.StatusOK, gin.H{
 			"message": "GET",
 		})
@@ -35,5 +38,6 @@ func main() {
 			"message": "DELETE",
 		})
 	})
+	//启动HTTP服务，默认在0.0.0.0:8080启动服务
 	r.Run(":9090")
 }
