@@ -6,7 +6,7 @@ import (
 )
 
 /*
-gin处理post请求
+gin处理post请求，获取form参数
 2022年11月22日21:34:39
 */
 
