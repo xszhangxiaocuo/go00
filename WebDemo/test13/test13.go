@@ -30,7 +30,9 @@ func main() {
 				"error": err.Error(),
 			})
 		} else {
+			//通过路径与文件名拼接得到文件完整的路径
 			dst := path.Join("test13/upload", file.Filename)
+			//将上传的文件保存到本地dst路径指向的文件
 			err = c.SaveUploadedFile(file, dst)
 			msg := "upload successful!"
 			if err != nil {

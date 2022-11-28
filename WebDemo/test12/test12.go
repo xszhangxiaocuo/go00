@@ -19,8 +19,9 @@ type UserInfo struct {
 func main() {
 	r := gin.Default()
 	//从querystring中获取数据
-	r.GET("/user", func(c *gin.Context) {
+	r.GET("/get_query", func(c *gin.Context) {
 		var u UserInfo
+		// ShouldBind()会根据请求的Content-Type自行选择绑定器
 		err := c.ShouldBind(&u)
 		if err != nil {
 			c.JSON(http.StatusBadGateway, gin.H{
@@ -34,7 +35,22 @@ func main() {
 		}
 	})
 	//从form表单获取数据，也可以从json格式的数据中获取
-	r.POST("/user", func(c *gin.Context) {
+	r.POST("/get_form", func(c *gin.Context) {
+		var u UserInfo
+		err := c.ShouldBind(&u)
+		if err != nil {
+			c.JSON(http.StatusBadGateway, gin.H{
+				"error": err.Error(),
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"name": u.Name,
+				"age":  u.Age,
+			})
+		}
+	})
+	//从json中获取数据
+	r.GET("/get_json", func(c *gin.Context) {
 		var u UserInfo
 		err := c.ShouldBind(&u)
 		if err != nil {

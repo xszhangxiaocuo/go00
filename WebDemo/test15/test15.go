@@ -19,6 +19,20 @@ func main() {
 			"msg": "该网页不存在！",
 		})
 	})
+	//any可以匹配所有请求方法
+	r.Any("/", func(c *gin.Context) {
+		switch c.Request.Method {
+		case "GET":
+			c.JSON(http.StatusOK, gin.H{"msg": "method:GET"})
+		case "POST":
+			c.JSON(http.StatusOK, gin.H{"msg": "method:POST"})
+		case "PUSH":
+			c.JSON(http.StatusOK, gin.H{"msg": "method:PUSH"})
+		case "DELETE":
+			c.JSON(http.StatusOK, gin.H{"msg": "method:DELETE"})
+
+		}
+	})
 	//将公用的前缀提取出来作为路由组，即访问的路由为"/index/xxx"
 	group := r.Group("/index")
 	{ //用代码块将路由组的代码放在一起，较为整洁
@@ -34,5 +48,6 @@ func main() {
 			c.JSON(http.StatusOK, gin.H{"msg": "index3"})
 		})
 	}
+
 	r.Run(":9090")
 }

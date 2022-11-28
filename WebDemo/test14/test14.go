@@ -20,6 +20,7 @@ func main() {
 	r.GET("/a", func(c *gin.Context) {
 		c.Request.URL.Path = "/b" //修改请求的URI地址，将请求转向路由b
 		r.HandleContext(c)        //继续执行后面的操作
+
 	})
 
 	r.GET("/b", func(c *gin.Context) {
