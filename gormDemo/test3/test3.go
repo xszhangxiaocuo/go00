@@ -1,6 +1,6 @@
 /*
-连接MySQL数据库
-2022年11月30日16:54:49
+连接MySQL数据库,并修改记录
+2022年11月30日21:19:15
 */
 
 package main
@@ -10,6 +10,14 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
+
+// UserInfo 一个结构体对应一张数据表，一个结构体中的字段对应数据表中的字段,ID字段为默认主键，可用tab `gorm:"primaryKey"`修改主键
+type UserInfo struct {
+	ID     int
+	Name   string
+	Gender string
+	Age    int
+}
 
 func main() {
 	//配置MySQL连接参数
