@@ -1,14 +1,76 @@
 package main
 
+import (
+	"bufio"
+	"fmt"
+	"math"
+	"os"
+	"strconv"
+	"strings"
+)
+
 /*
-给定2个非降序序列，要求把他们合并成1个非降序序列。假设所有元素个数为N，要求算法的时间复杂度为O(N)。
+给你一个非空列表，返回此列表中 第三大的数 。如果不存在，则返回列表中最大的数。
+这本是一道很简单的题目，但是Alan想请你动动脑：设计一个时间复杂度 O(n) 的解决方案。
 
 输入格式:
-输入有4行。
-第1行是一个正整数m，表示第2行有m个整数，这些整数构成一个非降序序列，每个整数之间以空格隔开。
-第3行是一个正整数n，表示第4行有n个整数，这些整数也构成一个非降序序列，每个整数之间以空格隔开。
-
-输出格式:
-把第2行的m个整数和第4行的n个整数合并成一个非降序序列，输出这个整数序列。每个数之间隔1个空格。
-2023年3月8日09:58:42
+输入一行数字。
+1 <= len(nums) <= 10^5
+-2^31 <= nums[i] <= 2^31 - 1
+2023年 3月 9日 星期四 13时44分02
 */
+
+func main() {
+	scanner := bufio.NewScanner(os.Stdin)
+	arr := make([]int64, 0)
+	if scanner.Scan() {
+		line := scanner.Text()
+		nums := strings.Split(line, " ")
+		for _, num := range nums {
+			n, err := strconv.Atoi(num)
+			if err == nil {
+				arr = append(arr, int64(n))
+			}
+		}
+	}
+
+	fmt.Print(find(arr))
+}
+
+func find(nums []int64) int64 {
+	var max1, max2, max3 int64 = math.MinInt64, math.MinInt64, math.MinInt64
+	flag := false //标志max3是否有效
+	t := 0
+	same := make(map[int64]int)
+	for _, num := range nums {
+		if num == max1 || num == max2 || num == max3 {
+			if num == max3 && flag {
+				same[max3]++
+			}
+			continue
+		}
+
+		if num > max1 {
+			max3 = max2
+			max2 = max1
+			max1 = num
+			t++
+		} else if num > max2 {
+			max3 = max2
+			max2 = num
+			t++
+		} else if num > max3 {
+			max3 = num
+		}
+
+		if t > 2 {
+			flag = true
+		}
+	}
+
+	if flag && same[max3] == 1 {
+		return max3
+	} else {
+		return max1
+	}
+}
