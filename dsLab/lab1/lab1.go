@@ -23,7 +23,8 @@ func main() {
 	vector2 := count(str2)
 
 	result := cal(vector1, vector2)
-	fmt.Printf("%f", result)
+
+	fmt.Printf("两篇文章的余弦相似度为：%f", result)
 }
 
 // 统计单词数
@@ -33,8 +34,8 @@ func count(str string) *myMap.MyMap {
 	var ch byte
 	for i := 0; i < len(str); i++ {
 		ch = str[i]
-		if ch < 'A' || ch > 'Z' {
-			ch -= 32
+		if ch >= 'A' && ch <= 'Z' {
+			ch += 32
 		}
 		if (ch < '0' || ch > '9') && (ch < 'a' || ch > 'z') && (ch < 'A' || ch > 'Z') {
 			if words.Get(string(word)) != nil { //单词已经存在就更新出现次数
@@ -57,15 +58,20 @@ func count(str string) *myMap.MyMap {
 	return words
 }
 
-// 计算相似度
+// 计算余弦相似度
 func cal(vector1 *myMap.MyMap, vector2 *myMap.MyMap) float64 {
 	var m, num1, num2 int
 	var n, n1, n2 float64
-	keys := vector1.GetKey() //保存两个map中最大的key的个数
+	var keys []string
+	keys1, size1 := vector1.GetKey()
+	keys2, size2 := vector2.GetKey()
+	fmt.Println("第一篇文章中共有", size1, "种单词")
+	fmt.Println("第二篇文章中共有", size2, "种单词")
+	keys = keys1 //保存两个map中最大的key的个数
 	bigMap := vector1
 	smallMap := vector2
-	if vector1.Size < vector2.Size { //判断出两个map中key个数较多的那个并更新相应的变量
-		keys = vector2.GetKey()
+	if size1 < size2 { //判断出两个map中key个数较多的那个并更新相应的变量
+		keys = keys2
 		bigMap, smallMap = smallMap, bigMap
 	}
 	for _, s := range keys { //遍历key个数较多的map中的所有key
@@ -80,10 +86,10 @@ func cal(vector1 *myMap.MyMap, vector2 *myMap.MyMap) float64 {
 		n2 += float64(num2 * num2)
 	}
 
-	keys = smallMap.GetKey()
-	for _, s := range keys { //遍历key个数较多的map中的所有key
+	keys, _ = smallMap.GetKey()
+	for _, s := range keys { //遍历key个数较小的map中的所有key
 		num2 = smallMap.Get(s).(int)
-		if bigMap.Get(s) != nil {
+		if bigMap.Get(s) != nil { //如果在bigMap中有这个key说明在上面一次遍历时已经计算过了
 			continue
 		} else {
 			num1 = 0
@@ -97,6 +103,7 @@ func cal(vector1 *myMap.MyMap, vector2 *myMap.MyMap) float64 {
 	return float64(m) / n
 }
 
+// 从文本文件中读取文章
 func readFile(fileName string) string {
 	str := ""
 	inputFile, inputErr := os.Open("./lab1/" + fileName)
@@ -109,6 +116,7 @@ func readFile(fileName string) string {
 	read := bufio.NewReader(inputFile)
 
 	for {
+		//文章末尾要有换行，不然会读取失败
 		tmp, readErr := read.ReadString('\n')
 		if readErr == io.EOF {
 			break

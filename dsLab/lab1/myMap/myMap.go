@@ -6,9 +6,9 @@ package myMap
 实现了自动扩容
 2023年3月25日12:56:35
 */
-var nowCapacity = 20 //当前容量
+var nowCapacity = 500 //当前容量
 
-var maxCapacity = 200   //最大容量
+var maxCapacity = 50000 //最大容量
 const loadFactor = 0.75 //负载因子
 
 type Entry struct {
@@ -18,7 +18,7 @@ type Entry struct {
 }
 
 type MyMap struct {
-	Size   int     //当前map中，key的个数
+	Size   int     //当前map中，bucket中已经有key存在的桶的个数
 	bucket []Entry //存放entry的桶
 }
 
@@ -69,7 +69,7 @@ func (mm *MyMap) Put(k string, v interface{}) {
 
 // 不对外暴露的插入方法
 func (mm *MyMap) insert(entry Entry) {
-	mm.Size += 1
+	mm.Size++
 	index := hashCode(entry.key, nowCapacity) //计算key所对应的哈希值，即当前要插入的下标
 	e := &mm.bucket[index]                    //获取当前key所对应位置的第一个entry指针
 	if e.key == "" {
@@ -107,9 +107,10 @@ func (mm *MyMap) Get(k string) interface{} {
 	return nil
 }
 
-// GetKey 获取当前map中所有的key
-func (mm *MyMap) GetKey() []string {
-	keys := make([]string, 0, mm.Size) //至少有size个entry节点
+// GetKey 获取当前map中所有的key以及key的个数
+func (mm *MyMap) GetKey() ([]string, int) {
+	keys := make([]string, 0, mm.Size) //最多有size个entry节点
+	num := 0                           //key的个数
 	for _, e := range mm.bucket {
 		tmpe := &e
 		if tmpe.key == "" { //key为空说明当前位置没有entry节点
@@ -118,8 +119,10 @@ func (mm *MyMap) GetKey() []string {
 		for tmpe.next != nil {
 			keys = append(keys, tmpe.key)
 			tmpe = tmpe.next
+			num++
 		}
 		keys = append(keys, tmpe.key)
+		num++
 	}
-	return keys
+	return keys, num
 }
