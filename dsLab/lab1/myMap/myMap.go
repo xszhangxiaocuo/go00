@@ -8,7 +8,7 @@ package myMap
 */
 var nowCapacity = 20 //当前容量
 
-const maxCapacity = 200 //最大容量
+var maxCapacity = 200   //最大容量
 const loadFactor = 0.75 //负载因子
 
 type Entry struct {
@@ -27,6 +27,10 @@ func CreatMap() *MyMap {
 	return &MyMap{0, make([]Entry, nowCapacity, maxCapacity)}
 }
 
+func SetMaxCapacity(capacity int) {
+	maxCapacity = capacity
+}
+
 // 计算hash code，将字符串k转化为byte数组并将所有值相加对length取余
 func hashCode(k string, length int) int {
 	sum := 0
@@ -39,6 +43,28 @@ func hashCode(k string, length int) int {
 // Put 对外暴露的插入方法，内部实际上直接调用insert
 func (mm *MyMap) Put(k string, v interface{}) {
 	mm.insert(Entry{k, v, nil})
+
+	//扩容
+	if float64(mm.Size)/float64(nowCapacity) > loadFactor {
+		if nowCapacity*2 > maxCapacity { //每次扩容大小乘以2，如果结果大于maxCapacity，就将最大值赋值给nowCapacity
+			nowCapacity = maxCapacity
+		} else {
+			nowCapacity *= 2
+		}
+		newMap := MyMap{0, make([]Entry, nowCapacity, maxCapacity)}
+
+		for _, e := range mm.bucket { //e不是指针，是一个entry类型的结构体
+			if e.value == "" {
+				continue
+			}
+			for e.next != nil {
+				newMap.insert(e)
+				e = *e.next //直接复制e.next节点的结构体内容，而不是复制指针
+			}
+			newMap.insert(e)
+		}
+		*mm = newMap
+	}
 }
 
 // 不对外暴露的插入方法
@@ -82,7 +108,7 @@ func (mm *MyMap) Get(k string) interface{} {
 }
 
 // GetKey 获取当前map中所有的key
-func (mm MyMap) GetKey() []string {
+func (mm *MyMap) GetKey() []string {
 	keys := make([]string, 0, mm.Size) //至少有size个entry节点
 	for _, e := range mm.bucket {
 		tmpe := &e
