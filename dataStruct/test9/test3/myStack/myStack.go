@@ -5,9 +5,11 @@ package myStack
 */
 
 type MyStack struct {
-	data     []interface{} //栈中的数据
-	size     int           //栈中当前元素个数
-	capacity int           //栈中最大容量
+	data []interface{} //栈中的数
+
+	// 据
+	size     int //栈中当前元素个数
+	capacity int //栈中最大容量
 }
 
 func NewMySack() *MyStack {
