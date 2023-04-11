@@ -68,3 +68,7 @@ func (q *Queue) GetHead() *Node {
 func (q *Queue) IsEmpty() bool {
 	return q.size == 0
 }
+
+func (q *Queue) GetSize() uint {
+	return q.size
+}
