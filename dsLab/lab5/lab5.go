@@ -2,11 +2,12 @@ package main
 
 import (
 	"bufio"
-	"container/heap"
+	"container/list"
 	"encoding/binary"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strconv"
 )
 
@@ -17,50 +18,50 @@ import (
 */
 
 type HuffmanTree struct {
-	char  rune
-	freq  int
-	left  *HuffmanTree
-	right *HuffmanTree
+	char    rune
+	freq    float64
+	parents *HuffmanTree
+	left    *HuffmanTree
+	right   *HuffmanTree
 }
 
-type PriorityQueue []*HuffmanTree
-
-func (pq PriorityQueue) Len() int { return len(pq) }
-
-func (pq PriorityQueue) Less(i, j int) bool {
-	return pq[i].freq < pq[j].freq
-}
-
-func (pq PriorityQueue) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
-}
-
-func (pq *PriorityQueue) Push(x interface{}) {
-	*pq = append(*pq, x.(*HuffmanTree))
-}
-
-func (pq *PriorityQueue) Pop() interface{} {
-	old := *pq
-	n := len(old)
-	item := old[n-1]
-	*pq = old[0 : n-1]
-	return item
-}
-
-func buildTree(freqMap map[rune]int) *HuffmanTree {
-	pq := make(PriorityQueue, len(freqMap))
-	i := 0
+func buildTree(freqMap map[rune]int, sum int) *HuffmanTree {
+	pq := make([]*HuffmanTree, len(freqMap))
+	x := 0
 	for key, value := range freqMap {
-		pq[i] = &HuffmanTree{key, value, nil, nil}
-		i++
+		pq[x] = &HuffmanTree{key, float64(value) / float64(sum), nil, nil, nil}
+		x++
 	}
-	heap.Init(&pq)
-	for pq.Len() > 1 {
-		a := heap.Pop(&pq).(*HuffmanTree)
-		b := heap.Pop(&pq).(*HuffmanTree)
-		heap.Push(&pq, &HuffmanTree{0, a.freq + b.freq, a, b})
+	sort.Slice(pq, func(i, j int) bool {
+		return pq[i].freq < pq[j].freq
+	})
+	l := &list.List{}
+	for _, v := range pq {
+		l.PushBack(v)
+		fmt.Printf("%c:%f\n", v.char, v.freq)
 	}
-	return heap.Pop(&pq).(*HuffmanTree)
+	for l.Len() > 1 {
+		a := l.Front().Value.(*HuffmanTree)
+		l.Remove(l.Front())
+		b := l.Front().Value.(*HuffmanTree)
+		l.Remove(l.Front())
+		parent := &HuffmanTree{0, a.freq + b.freq, nil, b, a}
+		a.parents = parent
+		b.parents = parent
+		tmp := l.Front()
+		for tmp != nil {
+			if tmp.Value.(*HuffmanTree).freq >= a.freq+b.freq {
+				l.InsertBefore(parent, tmp)
+				break
+			}
+			tmp = tmp.Next()
+		}
+		if tmp == nil {
+			l.PushBack(parent)
+		}
+
+	}
+	return l.Front().Value.(*HuffmanTree)
 }
 
 func generateCodes(root *HuffmanTree, code string, codes *map[rune]string) {
@@ -94,7 +95,7 @@ func main() {
 	for _, char := range string(file) { //统计各字符出现的次数
 		freqMap[char]++
 	}
-	root := buildTree(freqMap) //创建哈夫曼树
+	root := buildTree(freqMap, len(file)) //创建哈夫曼树
 	codes := make(map[rune]string)
 	generateCodes(root, "", &codes) //遍历哈夫曼树得到字母编码
 	fmt.Println("哈夫曼编码: ", codes)
