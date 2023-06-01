@@ -1,7 +1,7 @@
 package main
 
 import (
-	"dsLab/lab8/myMap/SCHashTable"
+	"dsLab/lab8/myMap/OAHashTable"
 	"fmt"
 	"github.com/tealeg/xlsx"
 	"strconv"
@@ -15,12 +15,12 @@ type telephoneInfo struct {
 }
 
 func main() {
-	sc := readInfo()
+	oa := readInfo()
 	for {
 		key := ""
-		fmt.Println("请输入要查询的用户名：")
+		fmt.Println("请输入要查询的电话号码：")
 		fmt.Scan(&key)
-		result := sc.Get(key)
+		result := oa.Get(key)
 		if result != nil {
 			fmt.Println(result)
 		} else {
@@ -36,8 +36,8 @@ func main() {
 }
 
 // 以用户名为关键字建立散列表
-func readInfo() *SCHashTable.SCHashTable {
-	sc := SCHashTable.CreatSCHashTable()
+func readInfo() *OAHashTable.OAHashTable {
+	sc := OAHashTable.CreatOAHashTable()
 	excelFileName := "lab8/telephone.xlsx"
 
 	// 打开XLSX文件
@@ -69,7 +69,7 @@ func readInfo() *SCHashTable.SCHashTable {
 					ti.phonenum = value
 				}
 			}
-			sc.Put(ti.name, ti)
+			sc.Put(ti.phonenum, ti)
 		}
 	}
 	return sc

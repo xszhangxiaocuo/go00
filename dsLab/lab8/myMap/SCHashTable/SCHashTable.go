@@ -1,4 +1,4 @@
-package scmap
+package SCHashTable
 
 /*
 一个以string类型为key的简易哈希表
