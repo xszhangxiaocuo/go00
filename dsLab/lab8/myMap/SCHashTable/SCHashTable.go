@@ -1,5 +1,7 @@
 package SCHashTable
 
+import "math"
+
 /*
 一个以string类型为key的简易哈希表
 散列函数：除留余数法
@@ -8,43 +10,74 @@ package SCHashTable
 实现了自动扩容
 2023年5月31日16:48:27
 */
-var nowCapacity = 500 //当前容量
+var nowCapacity uint = 2000 //当前容量
 
-var maxCapacity = 50000 //最大容量
-const loadFactor = 0.75 //负载因子
+var maxCapacity uint = 50000 //最大容量
+const loadFactor = 0.2       //负载因子
 
 type Entry struct {
 	key   string
 	value interface{}
+	count int    //探测次数
 	next  *Entry //数组相同位置，下一个Entry的指针
 }
 
 type SCHashTable struct {
-	Size   int     //当前map中，bucket中已经有key存在的桶的个数
-	bucket []Entry //存放entry的桶
+	Size     int     //当前map中，bucket中已经有key存在的桶的个数
+	bucket   []Entry //存放entry的桶
+	Count    int     //当前表中探测次数总数
+	Conflict int     //当前哈希表中冲突的元素个数（即探测次数大于1的元素个数）
 }
 
 // CreatSCHashTable 创建一个hash table并返回指针
 func CreatSCHashTable() *SCHashTable {
-	return &SCHashTable{0, make([]Entry, nowCapacity, maxCapacity)}
+	return &SCHashTable{0, make([]Entry, nowCapacity, maxCapacity), 0, 0}
 }
 
-func SetMaxCapacity(capacity int) {
+func SetMaxCapacity(capacity uint) {
 	maxCapacity = capacity
 }
 
 // SChashCode 计算hash code，将字符串k转化为byte数组并将所有值相加对length取余
-func SChashCode(k string, length int) int {
-	sum := 0
-	for _, num := range []byte(k) {
-		sum += int(num)
+//func SChashCode(k string, length uint) uint {
+//	var sum uint = 0
+//	for _, num := range []byte(k) {
+//		sum += uint(num)
+//	}
+//	return sum % length
+//}
+
+func SChashCode(k string, capacity uint) uint {
+	var sum uint = 0
+	var n uint = 0
+	l := 0
+	for capacity != 0 {
+		capacity /= 10
+		l++
 	}
-	return sum % length
+	for i, ch := range []byte(k) {
+		if ch >= 'A' && ch <= 'Z' {
+			n = n*10 + uint(ch-'A')%10
+		} else if ch >= 'a' && ch <= 'z' {
+			n = n*10 + uint(ch-'a')%10
+		}
+
+		if (i+1)%l == 0 {
+			sum += n
+			n = 0
+		}
+	}
+	sum += n
+	hashcode := sum % uint(math.Pow(10, float64(l)))
+	if hashcode >= capacity {
+		hashcode = sum % uint(math.Pow(10, float64(l-1)))
+	}
+	return hashcode
 }
 
 // Put 对外暴露的插入方法，内部实际上直接调用insert
 func (mm *SCHashTable) Put(k string, v interface{}) {
-	mm.insert(Entry{k, v, nil})
+	mm.insert(Entry{k, v, 1, nil})
 
 	//扩容
 	if float64(mm.Size)/float64(nowCapacity) > loadFactor {
@@ -53,19 +86,19 @@ func (mm *SCHashTable) Put(k string, v interface{}) {
 		} else {
 			nowCapacity *= 2
 		}
-		newMap := SCHashTable{0, make([]Entry, nowCapacity, maxCapacity)}
+		newSC := SCHashTable{0, make([]Entry, nowCapacity, maxCapacity), 0, 0}
 
 		for _, e := range mm.bucket { //e不是指针，是一个entry类型的结构体
-			if e.value == "" {
+			if e.value == nil {
 				continue
 			}
 			for e.next != nil {
-				newMap.insert(e)
+				newSC.insert(e)
 				e = *e.next //直接复制e.next节点的结构体内容，而不是复制指针
 			}
-			newMap.insert(e)
+			newSC.insert(e)
 		}
-		*mm = newMap
+		*mm = newSC
 	}
 }
 
@@ -76,21 +109,29 @@ func (mm *SCHashTable) insert(entry Entry) {
 	e := &mm.bucket[index]                      //获取当前key所对应位置的第一个entry指针
 	if e.key == "" {
 		*e = entry
+		mm.Count += entry.count
+		return
 	}
+	mm.Conflict++
 	for e.next != nil {
 		if e.key == entry.key {
 			entry.next = e.next
 			*e = entry
+			mm.Count += entry.count
 			return
 		}
 		e = e.next
+		entry.count++
 	}
 	if e.key == entry.key {
 		entry.next = e.next
 		*e = entry
+		mm.Count += entry.count
 		return
 	}
+	entry.count++
 	e.next = &entry
+	mm.Count += entry.count
 }
 
 // Get 获取key为k的value
@@ -107,6 +148,22 @@ func (mm *SCHashTable) Get(k string) interface{} {
 		return e.value
 	}
 	return nil
+}
+
+// GetCount 获取key为k的节点的count,0表示节点不存在
+func (mm *SCHashTable) GetCount(k string) int {
+	index := SChashCode(k, nowCapacity)
+	e := &mm.bucket[index]
+	for e.next != nil {
+		if e.key == k {
+			return e.count
+		}
+		e = e.next
+	}
+	if e.key == k {
+		return e.count
+	}
+	return 0
 }
 
 // GetKey 获取当前hash table中所有的key以及key的个数

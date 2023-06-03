@@ -23,6 +23,7 @@ func main() {
 		result := sc.Get(key)
 		if result != nil {
 			fmt.Println(result)
+			fmt.Println("本条记录查询了", sc.GetCount(key), "次")
 		} else {
 			fmt.Println("用户不存在！")
 		}
@@ -32,7 +33,8 @@ func main() {
 			break
 		}
 	}
-
+	fmt.Println("本次平均查找长度为：", float64(sc.Count)/float64(sc.Size))
+	fmt.Println("冲突率为:", float64(sc.Conflict)/float64(sc.Size))
 }
 
 // 以用户名为关键字建立散列表
@@ -50,10 +52,7 @@ func readInfo() *SCHashTable.SCHashTable {
 	// 遍历所有工作表
 	for _, sheet := range xlFile.Sheets {
 		// 遍历每一行
-		for i, row := range sheet.Rows {
-			if i == 0 {
-				continue
-			}
+		for _, row := range sheet.Rows {
 			ti := telephoneInfo{}
 			// 遍历每个单元格
 			for col, cell := range row.Cells {

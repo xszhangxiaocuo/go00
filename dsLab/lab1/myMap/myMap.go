@@ -74,6 +74,7 @@ func (mm *MyMap) insert(entry Entry) {
 	e := &mm.bucket[index]                    //获取当前key所对应位置的第一个entry指针
 	if e.key == "" {
 		*e = entry
+		return
 	}
 	for e.next != nil {
 		if e.key == entry.key {
