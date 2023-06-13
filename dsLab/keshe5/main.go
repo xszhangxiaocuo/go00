@@ -25,8 +25,47 @@ type Graph struct {
 	Edges    []Edge
 }
 
+func main() {
+	vertices := 5
+	graph := NewGraph(vertices)
+	//graph.AddEdge(0, 1, 2) // A -> B 权重为 2
+	//graph.AddEdge(0, 2, 4) // A -> C 权重为 4
+	//graph.AddEdge(1, 2, 1) // B -> C 权重为 1
+	//graph.AddEdge(1, 3, 3) // B -> D 权重为 3
+	//graph.AddEdge(1, 4, 7) // B -> E 权重为 7
+	//graph.AddEdge(2, 3, 5) // C -> D 权重为 5
+	//graph.AddEdge(3, 4, 6) // D -> E 权重为 6
+	//graph.AddEdge(2, 5, 2) // C -> F 权重为 2
+	//graph.AddEdge(3, 6, 1) // D -> G 权重为 1
+	//graph.AddEdge(4, 7, 5) // E -> H 权重为 5
+	//graph.AddEdge(5, 6, 6) // F -> G 权重为 6
+	//graph.AddEdge(6, 7, 4) // G -> H 权重为 4
+	//graph.AddEdge(5, 8, 3) // F -> I 权重为 3
+	//graph.AddEdge(6, 9, 2) // G -> J 权重为 2
+	//graph.AddEdge(8, 9, 1) // I -> J 权重为 1
+
+	graph.AddEdge(0, 1, 2) // A -> B 权重为 2
+	graph.AddEdge(0, 2, 5) // A -> C 权重为 4
+	graph.AddEdge(1, 2, 1) // B -> C 权重为 1
+	graph.AddEdge(1, 3, 5) // B -> D 权重为 3
+	graph.AddEdge(1, 4, 7) // B -> E 权重为 7
+	graph.AddEdge(2, 3, 5) // C -> D 权重为 5
+	graph.AddEdge(3, 4, 6) // D -> E 权重为 6
+
+	path, distance := TSP(graph)
+
+	fmt.Println("最短路径：")
+	for _, v := range path {
+		fmt.Printf("%d ", v)
+	}
+	fmt.Println()
+	fmt.Printf("最短路径距离：%d\n", distance)
+
+	DrawMap(graph, path)
+}
+
 func NewGraph(vertices int) *Graph {
-	rand.Seed(time.Now().UnixNano())
+	rand.Seed(time.Now().UnixNano()) //生成随机坐标用于绘制地图
 	nodes := make([]Node, vertices)
 	for i := 0; i < vertices; i++ {
 		nodes[i] = Node{
@@ -83,7 +122,7 @@ func TSP(graph *Graph) ([]int, int) {
 }
 func (g *Graph) GetEdgeWeight(src, dest int) int {
 	for _, edge := range g.Edges {
-		if (edge.Start == src && edge.End == dest) || (edge.Start == dest && edge.End == src) {
+		if (edge.Start == src && edge.End == dest) || (edge.Start == dest && edge.End == src) { //无向图，没有起点和终点
 			return edge.Weight
 		}
 	}
@@ -196,43 +235,4 @@ func DrawMap(graph *Graph, path []int) {
 	}
 
 	dc.SavePNG("map.png")
-}
-
-func main() {
-	vertices := 5
-	graph := NewGraph(vertices)
-	//graph.AddEdge(0, 1, 2) // A -> B 权重为 2
-	//graph.AddEdge(0, 2, 4) // A -> C 权重为 4
-	//graph.AddEdge(1, 2, 1) // B -> C 权重为 1
-	//graph.AddEdge(1, 3, 3) // B -> D 权重为 3
-	//graph.AddEdge(1, 4, 7) // B -> E 权重为 7
-	//graph.AddEdge(2, 3, 5) // C -> D 权重为 5
-	//graph.AddEdge(3, 4, 6) // D -> E 权重为 6
-	//graph.AddEdge(2, 5, 2) // C -> F 权重为 2
-	//graph.AddEdge(3, 6, 1) // D -> G 权重为 1
-	//graph.AddEdge(4, 7, 5) // E -> H 权重为 5
-	//graph.AddEdge(5, 6, 6) // F -> G 权重为 6
-	//graph.AddEdge(6, 7, 4) // G -> H 权重为 4
-	//graph.AddEdge(5, 8, 3) // F -> I 权重为 3
-	//graph.AddEdge(6, 9, 2) // G -> J 权重为 2
-	//graph.AddEdge(8, 9, 1) // I -> J 权重为 1
-
-	graph.AddEdge(0, 1, 2) // A -> B 权重为 2
-	graph.AddEdge(0, 2, 5) // A -> C 权重为 4
-	graph.AddEdge(1, 2, 1) // B -> C 权重为 1
-	graph.AddEdge(1, 3, 5) // B -> D 权重为 3
-	graph.AddEdge(1, 4, 7) // B -> E 权重为 7
-	graph.AddEdge(2, 3, 5) // C -> D 权重为 5
-	graph.AddEdge(3, 4, 6) // D -> E 权重为 6
-
-	path, distance := TSP(graph)
-
-	fmt.Println("最短路径：")
-	for _, v := range path {
-		fmt.Printf("%d ", v)
-	}
-	fmt.Println()
-	fmt.Printf("最短路径距离：%d\n", distance)
-
-	DrawMap(graph, path)
 }
