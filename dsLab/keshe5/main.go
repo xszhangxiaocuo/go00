@@ -13,7 +13,7 @@ import (
 2023年6月13日23:10:23
 */
 
-const Inf = math.MaxInt32
+const Inf = math.MaxInt32 //Inf表示两点不可到达
 
 type Node struct {
 	X, Y float64
@@ -33,26 +33,34 @@ type Graph struct {
 func main() {
 	vertices := 5
 	graph := NewGraph(vertices)
-	//graph.AddEdge(0, 1, 2) // A -> B 权重为 2
-	//graph.AddEdge(0, 2, 4) // A -> C 权重为 4
-	//graph.AddEdge(1, 2, 1) // B -> C 权重为 1
-	//graph.AddEdge(1, 3, 3) // B -> D 权重为 3
-	//graph.AddEdge(1, 4, 7) // B -> E 权重为 7
-	//graph.AddEdge(2, 3, 5) // C -> D 权重为 5
-	//graph.AddEdge(3, 4, 6) // D -> E 权重为 6
-	//graph.AddEdge(2, 5, 2) // C -> F 权重为 2
-	//graph.AddEdge(3, 6, 1) // D -> G 权重为 1
-	//graph.AddEdge(4, 7, 5) // E -> H 权重为 5
-	//graph.AddEdge(5, 6, 6) // F -> G 权重为 6
-	//graph.AddEdge(6, 7, 4) // G -> H 权重为 4
-	//graph.AddEdge(5, 8, 3) // F -> I 权重为 3
-	//graph.AddEdge(6, 9, 2) // G -> J 权重为 2
-	//graph.AddEdge(8, 9, 1) // I -> J 权重为 1
+	//graph.AddEdge(0, 1, 2)
+	//graph.AddEdge(0, 2, 4)
+	//graph.AddEdge(1, 2, 1)
+	//graph.AddEdge(1, 3, 3)
+	//graph.AddEdge(1, 4, 7)
+	//graph.AddEdge(2, 3, 5)
+	//graph.AddEdge(3, 4, 6)
+	//graph.AddEdge(2, 5, 2)
+	//graph.AddEdge(3, 6, 1)
+	//graph.AddEdge(4, 7, 5)
+	//graph.AddEdge(5, 6, 6)
+	//graph.AddEdge(6, 7, 4)
+	//graph.AddEdge(5, 8, 3)
+	//graph.AddEdge(6, 9, 2)
+	//graph.AddEdge(8, 9, 1)
+
+	//graph.AddEdge(0, 1, 2)
+	//graph.AddEdge(0, 2, 5)
+	//graph.AddEdge(1, 2, 1)
+	//graph.AddEdge(1, 3, 4)
+	//graph.AddEdge(1, 4, 7)
+	//graph.AddEdge(2, 3, 5)
+	//graph.AddEdge(3, 4, 6)
 
 	graph.AddEdge(0, 1, 2) // A -> B 权重为 2
-	graph.AddEdge(0, 2, 5) // A -> C 权重为 4
+	graph.AddEdge(0, 2, 4) // A -> C 权重为 4
 	graph.AddEdge(1, 2, 1) // B -> C 权重为 1
-	graph.AddEdge(1, 3, 5) // B -> D 权重为 3
+	graph.AddEdge(1, 3, 3) // B -> D 权重为 3
 	graph.AddEdge(1, 4, 7) // B -> E 权重为 7
 	graph.AddEdge(2, 3, 5) // C -> D 权重为 5
 	graph.AddEdge(3, 4, 6) // D -> E 权重为 6
@@ -96,15 +104,15 @@ func (g *Graph) AddEdge(src, dest, weight int) {
 }
 
 func TSP(graph *Graph) ([]int, int) {
-	start := 0
-	visited := make([]bool, graph.Vertices)
-	path := make([]int, 0)
+	start := 0                              //从编号为0的节点出发
+	visited := make([]bool, graph.Vertices) //标记节点是否被访问过
+	path := make([]int, 0)                  //记录最短路径
 	path = append(path, start)
 	visited[start] = true
 	for len(path) < graph.Vertices {
-		curr := path[len(path)-1]
-		next := -1
-		minDist := Inf
+		curr := path[len(path)-1] //当前节点
+		next := -1                //下一个节点
+		minDist := Inf            //当前节点到附近的最近距离
 
 		// 寻找距离当前节点最近且未访问过的节点
 		for v := 0; v < graph.Vertices; v++ {
@@ -114,7 +122,7 @@ func TSP(graph *Graph) ([]int, int) {
 			}
 		}
 
-		if next == -1 {
+		if next == -1 { //没有找到下一个可以走的节点
 			break
 		}
 
@@ -125,6 +133,8 @@ func TSP(graph *Graph) ([]int, int) {
 
 	return path, CalculatePathDistance(graph, path)
 }
+
+// GetEdgeWeight 获取两点之间的距离，如果两点之间不可到达，返回最大值Inf
 func (g *Graph) GetEdgeWeight(src, dest int) int {
 	for _, edge := range g.Edges {
 		if (edge.Start == src && edge.End == dest) || (edge.Start == dest && edge.End == src) { //无向图，没有起点和终点
