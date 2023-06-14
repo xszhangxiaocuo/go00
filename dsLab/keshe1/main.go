@@ -3,7 +3,10 @@ package main
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"sort"
+	"strconv"
+	"strings"
 )
 
 /*
@@ -24,14 +27,44 @@ type Item struct {
 }
 
 func main() {
-	a := []Item{{1, 1}, {1, 2}, {2, 3}}
-	b := []Item{{-1, 1}, {2, 2}, {3, 3}}
+	var input string
+	fmt.Print("请输入多项式A：")
+	fmt.Scan(&input)
+	a := extractItems(input)
+	fmt.Print("请输入多项式B：")
+	fmt.Scan(&input)
+	b := extractItems(input)
+
 	r1 := count(a, b, '+')
 	r2 := count(a, b, '-')
+	fmt.Print("A+B=")
 	printItems(r1)
-	fmt.Println(cal(r1, 1))
+	fmt.Print("A-B=")
 	printItems(r2)
-	fmt.Println(cal(r2, 1))
+
+	var x float64
+	fmt.Print("输入x的赋值：")
+	fmt.Scan(&x)
+	fmt.Printf("当x=%f时，多项式A的值为：%f", x, cal(r1, x))
+	fmt.Printf("当x=%f时，多项式B的值为：%f", x, cal(r2, x))
+}
+
+func extractItems(str string) []Item {
+	var items []Item
+
+	// 去除空格
+	str = strings.ReplaceAll(str, " ", "")
+
+	// 匹配每一项,输入的每一项格式必须为cx^e
+	re := regexp.MustCompile(`([-+]?\d+\.?\d*)x\^(\d+)`) //([-+]?\d+\.?\d*) 匹配系数部分，可以是正负号、整数或小数。x\^ 匹配"x^",(\d+) 匹配指数部分，一个或多个数字
+	matches := re.FindAllStringSubmatch(str, -1)
+	for _, match := range matches {
+		coefficient, _ := strconv.ParseFloat(match[1], 64) //匹配系数
+		exponent, _ := strconv.Atoi(match[2])              //匹配指数
+		items = append(items, Item{coefficient, exponent})
+	}
+
+	return items
 }
 
 func count(a []Item, b []Item, cal byte) []Item {
@@ -85,13 +118,17 @@ func cal(items []Item, x float64) float64 {
 }
 
 func printItems(items []Item) {
-	fmt.Print(len(items), ",")
-	for _, i := range items {
+	for n, i := range items {
+		if i.c == 0 {
+			continue
+		}
+		if n != 0 && i.c > 0 {
+			fmt.Print("+")
+		}
 		fmt.Print(i.c)
 		if i.e != 0 {
-			fmt.Print(" ", i.e)
+			fmt.Printf("x^%d", i.e)
 		}
-		fmt.Print(",")
 	}
 	fmt.Println()
 }
