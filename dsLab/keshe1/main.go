@@ -45,8 +45,8 @@ func main() {
 	var x float64
 	fmt.Print("输入x的赋值：")
 	fmt.Scan(&x)
-	fmt.Printf("当x=%f时，多项式A的值为：%f", x, cal(r1, x))
-	fmt.Printf("当x=%f时，多项式B的值为：%f", x, cal(r2, x))
+	fmt.Printf("当x=%f时，多项式A的值为：%f\n", x, cal(r1, x))
+	fmt.Printf("当x=%f时，多项式B的值为：%f\n", x, cal(r2, x))
 }
 
 func extractItems(str string) []Item {
