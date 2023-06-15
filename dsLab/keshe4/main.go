@@ -87,17 +87,24 @@ func (bst *BinarySearchTree) calculateSumDepthsAndCount(node *TreeNode, depth in
 	leftSumDepths, leftNodeCount := bst.calculateSumDepthsAndCount(node.Left, depth+1)
 	rightSumDepths, rightNodeCount := bst.calculateSumDepthsAndCount(node.Right, depth+1)
 
-	sumDepths := depth + leftSumDepths + rightSumDepths
-	nodeCount := 1 + leftNodeCount + rightNodeCount
+	sumDepths := depth + leftSumDepths + rightSumDepths //当前节点所在的深度加上左子树的深度和右子树的深度
+	nodeCount := 1 + leftNodeCount + rightNodeCount     //当前节点加上左子树节点个数加上右子树节点个数
 
 	return sumDepths, nodeCount
 }
 
 // 在二叉排序树中查找并删除节点，然后中序遍历
 func (bst *BinarySearchTree) DeleteAndInorderTraversal(val int) {
+	delFlag = false
 	bst.Root = bst.deleteNode(bst.Root, val)
+	if !delFlag {
+		fmt.Println("该元素不存在！")
+	}
+	fmt.Print("删除后的中序遍历结果: ")
 	bst.InorderTraversal(bst.Root)
 }
+
+var delFlag bool
 
 // 在二叉排序树中递归查找并删除节点
 func (bst *BinarySearchTree) deleteNode(root *TreeNode, val int) *TreeNode {
@@ -111,7 +118,7 @@ func (bst *BinarySearchTree) deleteNode(root *TreeNode, val int) *TreeNode {
 		root.Right = bst.deleteNode(root.Right, val)
 	} else {
 		// 找到要删除的节点
-
+		delFlag = true
 		// 节点为叶子节点，直接删除
 		if root.Left == nil && root.Right == nil {
 			root = nil
@@ -145,7 +152,7 @@ func (avl *AVLTree) Insert(data int) {
 }
 
 func (node *TreeNode) Insert(data int) *TreeNode {
-	// 如果节点为空，则初始化该节点
+	// 如果节点为空，则初始化该节点并返回，完成插入操作
 	if node == nil {
 		return &TreeNode{Val: data, Height: 1}
 	}
@@ -154,22 +161,19 @@ func (node *TreeNode) Insert(data int) *TreeNode {
 		return node
 	}
 
-	// 辅助变量，用于存储（旋转后）子树根节点
+	// 辅助变量，用于存储旋转后子树根节点
 	var newTreeNode *TreeNode
 
-	if data > node.Val {
-		// 插入的值大于当前节点值，要从右子树插入
+	if data > node.Val { // 插入的值大于当前节点值，要从右子树插入
 		node.Right = node.Right.Insert(data)
 		// 计算插入节点后当前节点的平衡因子
-		// 按照平衡二叉树的特征，平衡因子绝对值不能大于 1
+		// 平衡因子绝对值不能大于 1
 		bf := node.BalanceFactor()
 		// 如果右子树高度变高了，导致左子树-右子树的高度从 -1 变成了 -2
 		if bf == -2 {
-			if data > node.Right.Val {
-				// 表示在右子树中插入右子节点导致失衡，需要单左旋
+			if data > node.Right.Val { // 在右子树中插入右子节点导致失衡，需要单左旋
 				newTreeNode = LeftRotate(node)
-			} else {
-				// 表示在右子树中插上左子节点导致失衡，需要先右后左双旋
+			} else { // 在右子树中插上左子节点导致失衡，需要先右旋后左旋
 				newTreeNode = RightLeftRotation(node)
 			}
 		}
@@ -180,10 +184,10 @@ func (node *TreeNode) Insert(data int) *TreeNode {
 		// 左子树的高度变高了，导致左子树-右子树的高度从 1 变成了 2
 		if bf == 2 {
 			if data < node.Left.Val {
-				// 表示在左子树中插入左子节点导致失衡，需要单右旋
+				// 在左子树中插入左子节点导致失衡，需要单右旋
 				newTreeNode = RightRotate(node)
 			} else {
-				// 表示在左子树中插入右子节点导致失衡，需要先左后右双旋
+				// 在左子树中插入右子节点导致失衡，需要先左旋后右旋
 				newTreeNode = LeftRightRotation(node)
 			}
 		}
@@ -242,7 +246,7 @@ func RightRotate(node *TreeNode) *TreeNode {
 	pivot := node.Left    // pivot 表示新插入的节点
 	pivotR := pivot.Right // 暂存 pivot 右子树入口节点
 	pivot.Right = node    // 右旋后最小不平衡子树根节点 node 变成 pivot 的右子节点
-	node.Left = pivotR    // 而 pivot 原本的右子节点需要挂载到 node 节点的左子树上
+	node.Left = pivotR    // pivot 原本的右子节点需要挂载到 node 节点的左子树上
 
 	// 只有 node 和 pivot 的高度改变了
 	node.UpdateHeight()
@@ -257,7 +261,7 @@ func LeftRotate(node *TreeNode) *TreeNode {
 	pivot := node.Right  // pivot 表示新插入的节点
 	pivotL := pivot.Left // 暂存 pivot 左子树入口节点
 	pivot.Left = node    // 左旋后最小不平衡子树根节点 node 变成 pivot 的左子节点
-	node.Right = pivotL  // 而 pivot 原本的左子节点需要挂载到 node 节点的右子树上
+	node.Right = pivotL  // pivot 原本的左子节点需要挂载到 node 节点的右子树上
 
 	// 只有 node 和 pivot 的高度改变了
 	node.UpdateHeight()
@@ -267,7 +271,7 @@ func LeftRotate(node *TreeNode) *TreeNode {
 	return pivot
 }
 
-// LeftRightRotation 双旋操作（先左后右）
+// LeftRightRotation 先左旋后右旋
 func LeftRightRotation(node *TreeNode) *TreeNode {
 	node.Left = LeftRotate(node.Left)
 	return RightRotate(node)
@@ -279,7 +283,7 @@ func RightLeftRotation(node *TreeNode) *TreeNode {
 	return LeftRotate(node)
 }
 
-// 中序遍历平衡二叉树
+// InorderTraversal 中序遍历平衡二叉树
 func (avl *AVLTree) InorderTraversal(node *TreeNode) {
 	if node == nil {
 		return
@@ -290,7 +294,7 @@ func (avl *AVLTree) InorderTraversal(node *TreeNode) {
 	avl.InorderTraversal(node.Right)
 }
 
-// 计算平衡二叉树的平均查找长度
+// CalculateAverageSearchLength 计算平衡二叉树的平均查找长度
 func (avl *AVLTree) CalculateAverageSearchLength() float64 {
 	sumDepths, nodeCount := avl.calculateSumDepthsAndCount(avl.Root, 1)
 	return float64(sumDepths) / float64(nodeCount)
@@ -399,13 +403,12 @@ func main() {
 	averageSearchLength := bst.CalculateAverageSearchLength()
 	fmt.Printf("二叉排序树查找成功的平均查找长度: %.2f\n", averageSearchLength)
 
-	// 输入元素并查找删除节点，然后输出中序遍历结果
-	//var x int
-	//fmt.Print("请输入要查找删除的元素: ")
-	//fmt.Scanln(&x)
-	//fmt.Print("中序遍历结果: ")
-	//bst.DeleteAndInorderTraversal(x)
-	//fmt.Println()
+	//输入元素并查找删除节点，然后输出中序遍历结果
+	var num int
+	fmt.Print("请输入要查找删除的元素: ")
+	fmt.Scanln(&num)
+	bst.DeleteAndInorderTraversal(num)
+	fmt.Println()
 
 	// 构建平衡二叉树并输出中序遍历结果
 	avl := &AVLTree{}
