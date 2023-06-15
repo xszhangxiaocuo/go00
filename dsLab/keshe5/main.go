@@ -57,15 +57,15 @@ func main() {
 	//graph.AddEdge(2, 3, 5)
 	//graph.AddEdge(3, 4, 6)
 
-	graph.AddEdge(0, 1, 2) // A -> B 权重为 2
-	graph.AddEdge(0, 2, 4) // A -> C 权重为 4
-	graph.AddEdge(1, 2, 1) // B -> C 权重为 1
-	graph.AddEdge(1, 3, 3) // B -> D 权重为 3
-	graph.AddEdge(1, 4, 7) // B -> E 权重为 7
-	graph.AddEdge(2, 3, 5) // C -> D 权重为 5
-	graph.AddEdge(3, 4, 6) // D -> E 权重为 6
+	graph.AddEdge(0, 1, 2)
+	graph.AddEdge(0, 2, 4)
+	graph.AddEdge(1, 2, 1)
+	graph.AddEdge(1, 3, 3)
+	graph.AddEdge(1, 4, 7)
+	graph.AddEdge(2, 3, 5)
+	graph.AddEdge(3, 4, 6)
 
-	path, distance := TSP(graph)
+	path, distance := FindPath(graph)
 
 	fmt.Println("最短路径：")
 	for _, v := range path {
@@ -103,13 +103,15 @@ func (g *Graph) AddEdge(src, dest, weight int) {
 	g.Edges = append(g.Edges, edge)
 }
 
-func TSP(graph *Graph) ([]int, int) {
+func FindPath(graph *Graph) ([]int, int) {
 	start := 0                              //从编号为0的节点出发
 	visited := make([]bool, graph.Vertices) //标记节点是否被访问过
 	path := make([]int, 0)                  //记录最短路径
 	path = append(path, start)
 	visited[start] = true
-	for len(path) < graph.Vertices {
+	flag := false //每次寻路都有两种方案，false表示直接寻找距离当前节点最近的节点，true表示返回上一个节点另寻一条路
+	for !Finish(visited) {
+		flag = false
 		curr := path[len(path)-1] //当前节点
 		next := -1                //下一个节点
 		minDist := Inf            //当前节点到附近的最近距离
@@ -121,9 +123,26 @@ func TSP(graph *Graph) ([]int, int) {
 				minDist = graph.GetEdgeWeight(curr, v)
 			}
 		}
+		if len(path)-2 > 0 { //退回到上一个节点重新寻找是否存在一条路径比当前minDist还要小
+			minDist += graph.GetEdgeWeight(curr, path[len(path)-2]) //退回到上一个节点要增加一段距离
+			roadlen := 0
+			roadlen += graph.GetEdgeWeight(curr, path[len(path)-2]) * 2
+			curr = path[len(path)-2] //退回上一个节点
+			for v := 0; v < graph.Vertices; v++ {
+				if !visited[v] && graph.GetEdgeWeight(curr, v)+roadlen < minDist {
+					next = v
+					minDist = graph.GetEdgeWeight(curr, v) + roadlen
+					flag = true //方案二找到了一条比方案一还短的路径就采用方案二
+				}
+			}
+		}
 
 		if next == -1 { //没有找到下一个可以走的节点
 			break
+		}
+
+		if flag {
+			path = append(path, curr)
 		}
 
 		// 添加下一个节点到路径中，并标记为已访问
@@ -132,6 +151,16 @@ func TSP(graph *Graph) ([]int, int) {
 	}
 
 	return path, CalculatePathDistance(graph, path)
+}
+
+// Finish 判断寻路是否结束，如果还有节点为false则没有结束
+func Finish(visited []bool) bool {
+	for _, v := range visited {
+		if !v {
+			return false
+		}
+	}
+	return true
 }
 
 // GetEdgeWeight 获取两点之间的距离，如果两点之间不可到达，返回最大值Inf
